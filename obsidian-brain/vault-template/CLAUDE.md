@@ -60,3 +60,17 @@ Claude Code はこの Vault を直接読み書きして「AI秘書」として�
 | `/before-meeting 名前` | 打ち合わせ前の1分ブリーフィング |
 | `/weekly` | 週次未完了チェック（期限超過・止まっている案件・追客漏れ） |
 | `/ai-export` | Vault → Drive「Obsidian_AI_Export」へ一方向エクスポート |
+
+## 7. 実行環境の判定（PC / iPad・クラウド）
+- **PC モード**：`scripts/config.json` があり、`external_brain_dir` のフォルダが存在する → スクリプトで取り込み・エクスポート。
+- **クラウドモード**（iPad の Claude アプリ / claude.ai/code。Vault は非公開 GitHub リポジトリ）：
+  ローカルに Google Drive は無い。外部脳は **Google Drive コネクタ** で読む。
+  - `/inbox`：Drive の「iCloud外部脳」内「ボイスメモ」「AINOTE自動保存」を modifiedTime で新しい順に検索し、
+    `.claude/state/imported.json` に fileId が無く、かつ `00_Inbox/外部脳/` に同名ノートも無いものだけを読み（PC で取り込み済みの重複防止）、`00_Inbox/外部脳/<フォルダ名>/<ファイル名>.md` に
+    import_external_brain.py と同じ frontmatter（source / source_path に `drive:<fileId>` / record_date / date_confirmed / status）で保存してから整理する。
+    1回の処理は新しい順に最大10件（AINOTE は巨大なので要点部分のみ読む）。
+  - `/ai-export`：`python3 scripts/ai_export.py` は使えないので、Vault を連結した `ALL_IN_ONE_01.md` と `EXPORT_INFO.md` を作り、
+    Drive コネクタで「Obsidian_AI_Export」へアップロードする（除外ルールは同じ）。
+- **クラウドモードでの保存**：作業の最後に必ず `git add -A && git commit && git push origin main`。
+  この Vault リポジトリでは **main への直接 push をオーナーが許可済み**（iPad/Mac の Obsidian は main を同期するため）。
+  push 前に `git pull --rebase origin main` で他端末の変更を取り込む。衝突したら勝手に解決せず本人に確認。

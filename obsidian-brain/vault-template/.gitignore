@@ -1,6 +1,10 @@
-# Vault を git 管理する場合でも、PC固有設定と状態ファイルは除外
+# PC固有の設定だけ除外（.claude/state/ は端末間で共有するので git 管理する）
 CLAUDE.local.md
 .claude/settings.local.json
-.claude/state/
+.claude/AI秘書_運用ルール.md
 scripts/config.json
+scripts/__pycache__/
 .obsidian/workspace*.json
+.obsidian/plugins/obsidian-git/data.json
+.trash/
+.DS_Store

@@ -69,6 +69,9 @@ Claude Code に claude.ai アカウントでログインしていれば、claude
 ```
 Obsidian の「設定 → テンプレート」でテンプレートフォルダを `90_テンプレート` に指定すると、手入力でも同じ形式で書けます。
 
+## iPad から使う
+→ [iPad運用_C案.md](iPad運用_C案.md)（Vault を非公開 GitHub に置き、iPad の Claude アプリから操作）
+
 ## 安全設計
 - 外部脳（Drive）のファイルは **読むだけ**。取り込み済みは `.claude/state/imported.json` で管理し二重取り込みしない。
 - エクスポートは一方向。`private: true`・`#private`・パスワード/口座番号/カード番号らしき記述のあるノートは自動除外。
