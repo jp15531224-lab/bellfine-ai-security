@@ -1,0 +1,6 @@
+# Vault を git 管理する場合でも、PC固有設定と状態ファイルは除外
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/state/
+scripts/config.json
+.obsidian/workspace*.json

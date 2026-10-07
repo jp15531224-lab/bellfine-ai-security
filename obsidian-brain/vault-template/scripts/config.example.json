@@ -1,0 +1,6 @@
+{
+  "external_brain_dir": "~/Library/CloudStorage/GoogleDrive-あなたのGmail/マイドライブ/iCloud外部脳",
+  "export_dir": "~/Library/CloudStorage/GoogleDrive-あなたのGmail/マイドライブ/Obsidian_AI_Export",
+  "inbox_dir": "00_Inbox/外部脳",
+  "sources": ["ボイスメモ", "AINOTE自動保存"]
+}

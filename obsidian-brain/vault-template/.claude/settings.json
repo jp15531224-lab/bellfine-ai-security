@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/import_external_brain.py:*)",
+      "Bash(python3 scripts/ai_export.py:*)",
+      "Read(./**)",
+      "Edit(./00_Inbox/**)",
+      "Edit(./10_事業/**)",
+      "Edit(./20_人物/**)",
+      "Edit(./30_会議/**)",
+      "Edit(./40_日次/**)",
+      "Edit(./50_アイデア/**)",
+      "Edit(./.claude/state/**)"
+    ],
+    "deny": [
+      "Edit(./.obsidian/**)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}
