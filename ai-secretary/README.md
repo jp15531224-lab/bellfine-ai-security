@@ -28,7 +28,8 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 | 外部脳→Todoist自動登録 | 10:07/13:07/16:07/19:07/22:07 | 稼働中 | ToDo抽出→重複確認→Todoist、AI秘書ログに処理済みID |
 | 毎朝の行動計画 | 6:52 | 稼働中 | 全情報源横断で今日の計画 |
 | 週次 未完了チェック | 日 19:46 | 稼働中 | 期限超過・約束・停滞案件 |
-| ボイスメモ予定自動登録 | 6:49/17:49 | **10/2以降毎回失敗**（コネクタ未付与） | 確定予定→カレンダー |
+| ボイスメモ予定自動登録（旧） | 6:49/17:49 | **停止済み**（10/2以降コネクタ未付与で失敗していた。削除はしていない） | 確定予定→カレンダー自動登録 |
+| **予定承認→カレンダー登録（新規）** | 9:53/13:53/17:53/21:53 | **コネクタ付与待ち** | 確定予定をTodoistで承認→カレンダー |
 | **録音→Obsidian整理（新規）** | 9:23/13:23/17:23/21:23 | **コネクタ付与待ち** | 議事録・人物・案件・会社ノート生成 |
 
 ## 3. Obsidian 構成（Vault「淳平」/AI秘書/）
@@ -55,14 +56,14 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 | 個人情報漏えい | 電話番号・メール・口座番号・12桁番号を自動マスク。借金・人事・健康・家族等は `sensitivity: 機密` で概要のみ。実データはGitHubに置かない（本リポジトリはサンプルのみ） |
 | プロンプトインジェクション | 録音内容は「データ」扱いと明記。Obsidian整理ジョブはカレンダー/Todoistに書かない |
 
-## 5. カレンダー登録（承認制の提案・未有効化）
-**推奨: Todoist承認方式**
+## 5. カレンダー登録（Todoist承認制・採用）
+**採用: Todoist承認方式**（Routine `trig_01FS4B4T1V8NBjXVBhfBGf2u`、ラベル「予定承認」作成済み）
 1. 録音から `✅確定` の予定 → Todoist「確認待ち」に `【予定承認】10/15(木)10:00 山田建設 現地調査`（ラベル `予定承認`、説明に根拠の発言・出典ID）
 2. 本人が iPhone の Todoist で **完了にする＝承認**／**削除する＝却下**
 3. 次回実行で、完了済みの承認タスクだけカレンダー登録（4カレンダーで同日±60分の重複確認、`自動登録キー` 検索、colorId=5、招待メール無し）
 4. `❓要確認` の予定はカレンダーにもTodoistにも入れず、議事録・行動計画の「予定候補」に表示
 
-代替案: 既存ジョブのまま「確定は自動登録」（コネクタを付ければ即復旧）。承認の手間ゼロだが誤登録リスクが残る。
+旧方式（確定は自動登録）の Routine は停止して保持。旧方式で登録済みの予定も同じ「自動登録キー」書式なので、新方式の重複チェックで検出される。
 
 ## 6. Claude / ChatGPT からの参照
 - **Claude**: claude.ai / iPhoneのClaudeアプリで Google Drive・Plaud・Todoist・Googleカレンダーのコネクタが使える。「北川さんの件どうなってる？」→ 運用ルール§12の人物カルテ手順で、議事録ノート＋Plaud原文＋Todoistを横断。
@@ -73,8 +74,7 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 ## 7. iPhone と PC
 - PC: Google Drive for desktop で「淳平」フォルダを Vault として開いている（Driveに .obsidian 設定が同期されていることを確認済み）。
 - iPhone: Obsidian の iPhone アプリは Google Drive のフォルダを直接 Vault として開けない。選択肢:
-  - A. **Obsidian Sync（有料・推奨）**: PC の Vault を同期 → iPhone で閲覧・編集。設定5分。
-  - B. 無料: iPhone では Google Drive アプリで `.md` を閲覧、検索は Claude/ChatGPT アプリに聞く。
+  - **採用: Obsidian Sync**。手順と二重同期の注意点は `SETUP.md` ③。
 - 推奨プラグイン（PC/iPhone 共通）: **Dataview**（人物・案件ノートの自動一覧に使用）。
 
 ## 8. ファイル
@@ -82,7 +82,8 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 - `tests/test_render_notes.py` — `python3 -m unittest discover -s tests`
 - `samples/sample_extraction.json` — 架空のサンプル（実データは置かない）
 - `prompts/obsidian_sync_routine.md` — Routine「録音→Obsidian整理」のプロンプト
-- `prompts/calendar_approval_routine.md` — カレンダー承認制ジョブのプロンプト（未有効化）
+- `prompts/calendar_approval_routine.md` — Routine「予定承認→カレンダー登録」のプロンプト
+- `SETUP.md` — 本人がやる設定（コネクタ付与・Obsidian Sync・ChatGPT）
 
 ## 9. 費用・運用負荷
 - 追加費用: 0円（既存の Claude プランの Routine 実行枠を使用）。Obsidian Sync を使う場合のみ月額数ドル。
