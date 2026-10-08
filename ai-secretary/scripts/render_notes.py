@@ -17,6 +17,8 @@
     [[リンク]] するので、Obsidian のバックリンク / Dataview で自動集約される。
   - 聞き取りが不確かな固有名詞はリンク化しない（誤った人物ノートを増やさない）。
   - 電話番号・メール・口座番号らしき数字列はマスクする（情報漏えい対策）。
+  - 議事録は「事業」「月別」のハブノートにリンクする（グラフビューで事業・時期ごとに束ねる）。
+    ハブノートも create_if_absent。source.transcript_note があれば文字起こし全文ノートへもリンクする。
 """
 from __future__ import annotations
 
@@ -27,7 +29,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 JST = timezone(timedelta(hours=9))
 WEEKDAYS = "月火水木金土日"
 
@@ -37,6 +39,8 @@ FOLDERS = {
     "case": "案件",
     "company": "会社",
     "digest": "処理ログ",
+    "business": "事業",
+    "month": "月別",
 }
 BUSINESSES = {"グリーン興産", "ベルフィーヌ", "AI防犯カメラ", "全厚済", "新規事業", "プライベート", "不明"}
 SOURCE_TYPES = {"plaud", "voicememo", "ainote", "drive"}
@@ -175,6 +179,74 @@ def _entity_ref(folder_key: str, ent: dict, honorific: str = "") -> str:
     return f"{mask(ent['name'])}（聞き取り要確認）"
 
 
+def business_hub_link(business: str) -> str:
+    return f"[[{FOLDERS['business']}/{safe_name(business)}]]"
+
+
+def month_hub_link(dt: datetime) -> str:
+    return f"[[{FOLDERS['month']}/{dt:%Y-%m}]]"
+
+
+def safe_note_path(path: str) -> str:
+    """文字起こしノートのVault内パス（例 文字起こし/AINOTE/xxx.md）をリンク用に整える。"""
+    parts = [safe_name(p, 120) for p in (path or "").replace("\\", "/").split("/") if p.strip()]
+    parts = [p for p in parts if p and p not in (".", "..")]
+    if not parts:
+        return ""
+    if parts[-1].endswith(".md"):
+        parts[-1] = parts[-1][:-3]
+    return "/".join(parts)
+
+
+def render_business_hub(business: str, generated_at: str) -> str:
+    name = safe_name(business)
+    return "\n".join([
+        "---", "type: 事業", f"name: {yaml_str(name)}", f"generated_at: {generated_at}",
+        "tags: [AI秘書, 事業ハブ]", "---", "",
+        f"# 事業：{name}", "",
+        "この事業に分類された議事録・文字起こしの集まる場所です（分類はAI推定。違っていたら議事録の business を直してください）。",
+        "グラフビューでは、このノートを中心に関連ノートが束ねられます。", "",
+        "## 議事録（自動一覧）",
+        "```base",
+        "filters:",
+        "  and:",
+        '    - file.inFolder("AI秘書/議事録")',
+        f'    - business == "{name}"',
+        "views:",
+        "  - type: table",
+        "    name: 新しい順",
+        "    order: [file.name, summary, basis]",
+        "    sort:",
+        "      - property: file.name",
+        "        direction: DESC",
+        "```", "",
+        "## メモ（手入力欄）", "- ", "",
+    ]) + "\n"
+
+
+def render_month_hub(month: str, generated_at: str) -> str:
+    return "\n".join([
+        "---", "type: 月別", f"month: {yaml_str(month)}", f"generated_at: {generated_at}",
+        "tags: [AI秘書, 月別ハブ]", "---", "",
+        f"# {month} の記録", "",
+        "この月の議事録・文字起こしの集まる場所です。", "",
+        "## この月のノート（自動一覧）",
+        "```base",
+        "filters:",
+        "  and:",
+        '    - file.inFolder("AI秘書")',
+        f'    - file.name.startsWith("{month}")',
+        "views:",
+        "  - type: table",
+        "    name: 日付順",
+        "    order: [file.name, file.folder, business]",
+        "    sort:",
+        "      - property: file.name",
+        "        direction: ASC",
+        "```", "",
+    ]) + "\n"
+
+
 def minutes_filename(d: dict) -> str:
     src = d["source"]
     dt = parse_recorded_at(src["recorded_at"])
@@ -205,6 +277,8 @@ def render_minutes(d: dict, generated_at: str) -> str:
         f"duration_min: {int(src.get('duration_min') or 0)}",
         f"basis: {src['basis']}",
         f"business: {d.get('business', '不明')}",
+        f"business_hub: {yaml_str(business_hub_link(d.get('business', '不明')))}",
+        f"month: {yaml_str(month_hub_link(dt))}",
         f"sensitivity: {d.get('sensitivity', '通常')}",
         "people: " + yaml_list("[[%s/%s]]" % (FOLDERS["person"], n) for n in certain_people),
         "companies: " + yaml_list("[[%s/%s]]" % (FOLDERS["company"], n) for n in certain_companies),
@@ -220,7 +294,8 @@ def render_minutes(d: dict, generated_at: str) -> str:
     b.append(f"# {mask(src['title'])}")
     b.append("")
     b.append(f"> 録音日時: {dt:%Y-%m-%d}({WEEKDAYS[dt.weekday()]}) {dt:%H:%M} JST ／ 情報源: {SOURCE_LABEL[src['type']]}"
-             f" ／ 根拠: {src['basis']} ／ 事業: {d.get('business', '不明')}")
+             f" ／ 根拠: {src['basis']} ／ 事業: {_link('business', d.get('business', '不明'))}"
+             f" ／ 月: {_link('month', f'{dt:%Y-%m}')}")
     if src["basis"] == "要約のみ":
         b.append("> ⚠ AI要約のみから作成。原文の文字起こしは未確認です。")
     if d.get("sensitivity") == "機密":
@@ -281,6 +356,10 @@ def render_minutes(d: dict, generated_at: str) -> str:
 
     b.append("## 原本")
     b.append(f"- 出典ID: `{src['type']}:{src['id']}`")
+    if src.get("transcript_note"):
+        tn = safe_note_path(src["transcript_note"])
+        if tn:
+            b.append(f"- 文字起こし全文: [[{tn}|全文を開く]]")
     if src.get("url"):
         b.append(f"- リンク: {src['url']}")
     if src.get("file_name"):
@@ -371,6 +450,16 @@ def render_all(extractions: list[dict], generated_at: str | None = None) -> list
                 out.append({"folder": FOLDERS[kind], "filename": f"{name}.md", "mode": "create_if_absent",
                             "source_id": f"{d['source']['type']}:{d['source']['id']}",
                             "content": _stub(kind, name, d, extra, generated_at)})
+        bname = safe_name(d.get("business", "不明"))
+        if ("business", bname) not in seen:
+            seen.add(("business", bname))
+            out.append({"folder": FOLDERS["business"], "filename": f"{bname}.md", "mode": "create_if_absent",
+                        "source_id": "", "content": render_business_hub(bname, generated_at)})
+        month = f"{parse_recorded_at(d['source']['recorded_at']):%Y-%m}"
+        if ("month", month) not in seen:
+            seen.add(("month", month))
+            out.append({"folder": FOLDERS["month"], "filename": f"{month}.md", "mode": "create_if_absent",
+                        "source_id": "", "content": render_month_hub(month, generated_at)})
     return out
 
 

@@ -104,6 +104,32 @@ class TestRender(unittest.TestCase):
         md = next(f["content"] for f in files if f["folder"] == "議事録")
         self.assertNotIn("[[人物/石原]]", md.split("---")[1])
 
+    def test_business_and_month_hubs(self):
+        md = next(f["content"] for f in self.files if f["folder"] == "議事録")
+        biz = SAMPLE["business"]
+        self.assertIn(f'business_hub: "[[事業/{biz}]]"', md)
+        self.assertIn('month: "[[月別/2026-10]]"', md)
+        self.assertIn(f"[[事業/{biz}|{biz}]]", md)
+        self.assertIn(("事業", f"{biz}.md"), self.by)
+        self.assertIn(("月別", "2026-10.md"), self.by)
+        hub = self.by[("事業", f"{biz}.md")]["content"]
+        self.assertIn(f'business == "{biz}"', hub)
+        self.assertIn("```base", hub)
+        files = rn.render_all([SAMPLE, SAMPLE], "2026-10-08T12:00+09:00")
+        self.assertEqual(len([f for f in files if f["folder"] in ("事業", "月別")]), 2)
+
+    def test_transcript_note_link(self):
+        d = copy.deepcopy(SAMPLE)
+        d["source"]["type"] = "ainote"
+        d["source"]["transcript_note"] = "AI秘書/文字起こし/AINOTE/2026-02-12_1144_会話__drive-1N7tjGtL.md"
+        md = rn.render_minutes(d, "2026-10-08T12:00+09:00")
+        self.assertIn("[[AI秘書/文字起こし/AINOTE/2026-02-12_1144_会話__drive-1N7tjGtL|全文を開く]]", md)
+        self.assertIn("情報源: AINOTE", md)
+        d["source"]["transcript_note"] = "../[[x]]|y"
+        md = rn.render_minutes(d, "2026-10-08T12:00+09:00")
+        self.assertNotIn("../", md.split("## 原本")[1])
+        self.assertNotIn("[[[[", md)
+
     def test_invalid_raises(self):
         d = copy.deepcopy(SAMPLE)
         d["summary"] = ""
