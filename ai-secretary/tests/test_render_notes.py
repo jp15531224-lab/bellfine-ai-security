@@ -130,6 +130,15 @@ class TestRender(unittest.TestCase):
         self.assertNotIn("../", md.split("## 原本")[1])
         self.assertNotIn("[[[[", md)
 
+    def test_self_company_not_created(self):
+        d = copy.deepcopy(SAMPLE)
+        d["companies"].append({"name": "グリーン興産", "certain": True})
+        files = rn.render_all([d], "2026-10-08T12:00+09:00")
+        self.assertNotIn(("会社", "グリーン興産.md"), {(f["folder"], f["filename"]) for f in files})
+        md = next(f["content"] for f in files if f["folder"] == "議事録")
+        self.assertIn("グリーン興産（自社）", md)
+        self.assertNotIn("[[会社/グリーン興産]]", md)
+
     def test_invalid_raises(self):
         d = copy.deepcopy(SAMPLE)
         d["summary"] = ""

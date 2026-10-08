@@ -29,7 +29,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 JST = timezone(timedelta(hours=9))
 WEEKDAYS = "月火水木金土日"
 
@@ -48,6 +48,7 @@ SOURCE_LABEL = {"plaud": "Plaud", "voicememo": "iPhoneボイスメモ", "ainote"
 BASIS = {"文字起こし確認済", "要約のみ", "文字起こし一部確認"}
 SENSITIVITY = {"通常", "機密"}
 PRIORITIES = {"P1", "P2", "P3", "P4"}
+SELF_COMPANIES = {"グリーン興産", "ベルフィーヌ", "全厚済", "全国福利厚生共済会"}  # 自社は取引先ノートにしない
 SELF_NAMES = {"本人", "石原", "石原さん", "淳平", "石原淳平"}
 SCHEDULE_STATUS = {"確定", "要確認"}
 
@@ -174,6 +175,8 @@ def _link(folder_key: str, name: str) -> str:
 
 def _entity_ref(folder_key: str, ent: dict, honorific: str = "") -> str:
     name = person_key(ent["name"]) if folder_key == "person" else safe_name(ent["name"])
+    if folder_key == "company" and name in SELF_COMPANIES:
+        return f"{name}（自社）"
     if ent.get("certain", False) and name:
         return _link(folder_key, name) + honorific
     return f"{mask(ent['name'])}（聞き取り要確認）"
@@ -263,7 +266,8 @@ def render_minutes(d: dict, generated_at: str) -> str:
     cases = d.get("cases", [])
     certain_people = [person_key(p["name"]) for p in people
                       if p.get("certain") and person_key(p["name"]) not in SELF_NAMES]
-    certain_companies = [safe_name(c["name"]) for c in companies if c.get("certain")]
+    certain_companies = [safe_name(c["name"]) for c in companies
+                         if c.get("certain") and safe_name(c["name"]) not in SELF_COMPANIES]
     certain_cases = [safe_name(c["name"]) for c in cases if c.get("certain", True)]
 
     fm = [
@@ -445,6 +449,8 @@ def render_all(extractions: list[dict], generated_at: str | None = None) -> list
                     continue
                 if kind == "person" and (name in SELF_NAMES or ent["name"] in SELF_NAMES):
                     continue  # 本人の人物ノートは作らない
+                if kind == "company" and name in SELF_COMPANIES:
+                    continue  # 自社の会社ノートは作らない
                 seen.add((kind, name))
                 extra = {"company": ent.get("company"), "role": ent.get("role")} if kind == "person" else \
                         {"status": ent.get("status")} if kind == "case" else {}
