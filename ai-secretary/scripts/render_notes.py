@@ -27,7 +27,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 JST = timezone(timedelta(hours=9))
 WEEKDAYS = "月火水木金土日"
 
@@ -188,7 +188,8 @@ def render_minutes(d: dict, generated_at: str) -> str:
     people = [p for p in d.get("people", [])]
     companies = d.get("companies", [])
     cases = d.get("cases", [])
-    certain_people = [person_key(p["name"]) for p in people if p.get("certain")]
+    certain_people = [person_key(p["name"]) for p in people
+                      if p.get("certain") and person_key(p["name"]) not in SELF_NAMES]
     certain_companies = [safe_name(c["name"]) for c in companies if c.get("certain")]
     certain_cases = [safe_name(c["name"]) for c in cases if c.get("certain", True)]
 
@@ -362,6 +363,8 @@ def render_all(extractions: list[dict], generated_at: str | None = None) -> list
                 name = person_key(ent["name"]) if kind == "person" else safe_name(ent["name"])
                 if not certain or not name or (kind, name) in seen:
                     continue
+                if kind == "person" and (name in SELF_NAMES or ent["name"] in SELF_NAMES):
+                    continue  # 本人の人物ノートは作らない
                 seen.add((kind, name))
                 extra = {"company": ent.get("company"), "role": ent.get("role")} if kind == "person" else \
                         {"status": ent.get("status")} if kind == "case" else {}

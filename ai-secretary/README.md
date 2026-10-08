@@ -57,7 +57,7 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 | プロンプトインジェクション | 録音内容は「データ」扱いと明記。Obsidian整理ジョブはカレンダー/Todoistに書かない |
 
 ## 5. カレンダー登録（Todoist承認制・採用）
-**採用: Todoist承認方式**（Routine `trig_01FS4B4T1V8NBjXVBhfBGf2u`、ラベル「予定承認」作成済み）
+**採用: Todoist承認方式**（Routine `<RoutineID>`、ラベル「予定承認」作成済み）
 1. 録音から `✅確定` の予定 → Todoist「確認待ち」に `【予定承認】10/15(木)10:00 山田建設 現地調査`（ラベル `予定承認`、説明に根拠の発言・出典ID）
 2. 本人が iPhone の Todoist で **完了にする＝承認**／**削除する＝却下**
 3. 次回実行で、完了済みの承認タスクだけカレンダー登録（4カレンダーで同日±60分の重複確認、`自動登録キー` 検索、colorId=5、招待メール無し）
@@ -66,7 +66,7 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 旧方式（確定は自動登録）の Routine は停止して保持。旧方式で登録済みの予定も同じ「自動登録キー」書式なので、新方式の重複チェックで検出される。
 
 ## 6. Claude / ChatGPT からの参照
-- **Claude**: claude.ai / iPhoneのClaudeアプリで Google Drive・Plaud・Todoist・Googleカレンダーのコネクタが使える。「北川さんの件どうなってる？」→ 運用ルール§12の人物カルテ手順で、議事録ノート＋Plaud原文＋Todoistを横断。
+- **Claude**: claude.ai / iPhoneのClaudeアプリで Google Drive・Plaud・Todoist・Googleカレンダーのコネクタが使える。「○○さんの件どうなってる？」→ 運用ルール§12の人物カルテ手順で、議事録ノート＋Plaud原文＋Todoistを横断。
 - **ChatGPT**: ChatGPT の Google Drive 連携（設定 > コネクタ/アプリ）で Drive を接続すれば、`AI秘書/議事録` の Markdown を検索・引用できる（読み取り専用でよい）。Markdown は frontmatter に日時・出典を持つので、回答に原本IDを出させられる。
   - 注意: 接続すると ChatGPT 側から Drive 全体が見える。「データ管理 > モデル改善」をオフにすること。機密ノートは概要のみの設計にしてある。
 - 共通: どちらも「回答には出典ID（plaud:… / drive:…）と録音日時を必ず付けて」と指示すると、原本に戻れる。

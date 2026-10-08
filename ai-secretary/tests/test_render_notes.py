@@ -96,6 +96,14 @@ class TestRender(unittest.TestCase):
         names = [(f["folder"], f["filename"]) for f in files]
         self.assertEqual(len([n for n in names if n[0] == "人物"]), 1)
 
+    def test_self_person_not_created(self):
+        d = copy.deepcopy(SAMPLE)
+        d["people"].append({"name": "石原さん", "certain": True})
+        files = rn.render_all([d], "2026-10-08T12:00+09:00")
+        self.assertNotIn(("人物", "石原.md"), {(f["folder"], f["filename"]) for f in files})
+        md = next(f["content"] for f in files if f["folder"] == "議事録")
+        self.assertNotIn("[[人物/石原]]", md.split("---")[1])
+
     def test_invalid_raises(self):
         d = copy.deepcopy(SAMPLE)
         d["summary"] = ""
