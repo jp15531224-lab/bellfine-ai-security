@@ -1,0 +1,21 @@
+{
+  "source": {"type": "plaud", "id": "of_sample0000000000000000000000000000",
+    "title": "（サンプル）山田建設 防犯カメラ商談",
+    "recorded_at": "2026-10-01T15:00:00+09:00", "duration_min": 30, "basis": "文字起こし確認済",
+    "file_name": "サンプル録音"},
+  "business": "AI防犯カメラ",
+  "sensitivity": "通常",
+  "summary": "山田建設の資材置場へのAI防犯カメラ4台導入を提案。見積を来週送付する約束。連絡先 090-1234-5678。",
+  "people": [{"name": "山田太郎さん", "company": "山田建設", "role": "社長", "certain": true},
+             {"name": "スズキ", "certain": false}],
+  "companies": [{"name": "山田建設", "certain": true}],
+  "cases": [{"name": "山田建設 資材置場カメラ", "status": "見積待ち"}],
+  "decisions": ["4台構成で見積を作成"],
+  "promises": [{"who": "本人", "to": "山田さん", "what": "見積を送付", "due": "2026-10-09"}],
+  "todos": [{"owner": "本人", "task": "山田さんへ4台構成の見積を送付", "due": "2026-10-09", "due_basis": "録音日10/1(木)の「来週金曜」", "priority": "P2"},
+            {"owner": "山田さん", "task": "設置場所の図面を送付"}],
+  "schedules": [{"title": "山田建設 現地調査", "date": "2026-10-15", "start": "10:00", "status": "確定",
+                 "evidence": "15日の10時に現地見に行きます、はい、それでお願いします"},
+                {"title": "次回打合せ", "status": "要確認", "missing": "「また来月あたり」で日時未定"}],
+  "uncertain": ["「スズキ」さんの所属が不明"]
+}
