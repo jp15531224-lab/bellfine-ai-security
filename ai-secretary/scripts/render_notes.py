@@ -236,6 +236,7 @@ def render_month_hub(month: str, generated_at: str) -> str:
         "  and:",
         '    - file.inFolder("AI秘書")',
         f'    - file.name.startsWith("{month}")',
+        f'    - \'!file.inFolder("AI秘書/月別")\'',
         "views:",
         "  - type: table",
         "    name: 日付順",
