@@ -72,6 +72,9 @@ AINOTE → Drive「AINOTE自動保存」────────────┤
 - 共通: どちらも「回答には出典ID（plaud:… / drive:…）と録音日時を必ず付けて」と指示すると、原本に戻れる。
 
 ## 7. iPhone と PC
+- **正本 Vault は「淳平」（AI秘書専用）**。PC の別 Vault「Ishihara-Brain」とは分けて運用する（2026-10-08 本人決定）。
+- 設定変更前のバックアップ: マイドライブ直下「Obsidianバックアップ_淳平_20261008-1400」（.obsidian 設定5ファイル＋既存ノート2件）。
+- 追加済み: `.obsidian/bookmarks.json`（ホーム・議事録一覧・設定手順）、`AI秘書/02_議事録一覧.base`（標準機能 Bases の一覧。Dataview 不要）。
 - PC: Google Drive for desktop で「淳平」フォルダを Vault として開いている（Driveに .obsidian 設定が同期されていることを確認済み）。
 - iPhone: Obsidian の iPhone アプリは Google Drive のフォルダを直接 Vault として開けない。選択肢:
   - **採用: Obsidian Sync**。手順と二重同期の注意点は `SETUP.md` ③。
