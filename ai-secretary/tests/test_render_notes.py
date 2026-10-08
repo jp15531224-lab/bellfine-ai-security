@@ -139,6 +139,23 @@ class TestRender(unittest.TestCase):
         self.assertIn("グリーン興産（自社）", md)
         self.assertNotIn("[[会社/グリーン興産]]", md)
 
+    def test_key_points_and_related_notes(self):
+        d = copy.deepcopy(SAMPLE)
+        d["key_points"] = ["見積は4台構成で提出する"]
+        d["related_notes"] = [
+            {"path": "AI秘書/議事録/2026-09-20_1000_山田建設 初回訪問__plaud-aaaa1111.md", "reason": "会社: 山田建設"},
+        ]
+        self.assertEqual(rn.validate(d), [])
+        md = rn.render_minutes(d, "2026-10-08T12:00+09:00")
+        self.assertIn("## 重要事項\n- 見積は4台構成で提出する", md)
+        self.assertIn("[[AI秘書/議事録/2026-09-20_1000_山田建設 初回訪問__plaud-aaaa1111|2026-09-20_1000_山田建設 初回訪問]] — 共通: 会社: 山田建設", md)
+
+    def test_related_notes_validation(self):
+        d = copy.deepcopy(SAMPLE)
+        d["related_notes"] = [{"path": "../秘密.md", "reason": "x"}, {"path": "AI秘書/議事録/a.md"}]
+        errs = rn.validate(d)
+        self.assertEqual(len([e for e in errs if "related_notes" in e]), 2)
+
     def test_invalid_raises(self):
         d = copy.deepcopy(SAMPLE)
         d["summary"] = ""

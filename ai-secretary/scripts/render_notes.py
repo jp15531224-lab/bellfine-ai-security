@@ -29,7 +29,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.2.1"
+VERSION = "1.3.0"
 JST = timezone(timedelta(hours=9))
 WEEKDAYS = "月火水木金土日"
 
@@ -161,6 +161,13 @@ def validate(d: dict) -> list[str]:
                 errs.append(f"schedules[{i}] 確定には evidence（原文引用）が必要")
             if src.get("basis") == "要約のみ":
                 errs.append(f"schedules[{i}] 要約のみの記録から『確定』にはできません")
+    for i, r in enumerate(d.get("related_notes", [])):
+        if not isinstance(r, dict) or not r.get("path"):
+            errs.append(f"related_notes[{i}].path が必要です")
+        elif not str(r["path"]).startswith("AI秘書/議事録/"):
+            errs.append(f"related_notes[{i}].path は AI秘書/議事録/ 配下のみ")
+        elif not r.get("reason"):
+            errs.append(f"related_notes[{i}].reason（共通する会社・案件など）が必要です")
     for key in ("people", "companies", "cases"):
         for i, p in enumerate(d.get(key, [])):
             if not p.get("name"):
@@ -315,6 +322,8 @@ def render_minutes(d: dict, generated_at: str) -> str:
         b.extend(lines if lines else ["- なし"])
         b.append("")
 
+    if d.get("key_points"):
+        section("重要事項", [f"- {mask(x)}" for x in d["key_points"]])
     section("関係者", [f"- {_entity_ref('person', p, p.get('honorific', ''))}"
                      + (f"（{mask(p['company'])}）" if p.get("company") else "")
                      + (f" — {mask(p['role'])}" if p.get("role") else "") for p in people]
@@ -359,6 +368,15 @@ def render_minutes(d: dict, generated_at: str) -> str:
     section("予定", sch)
     section("要確認（聞き取り・解釈が曖昧）", [f"- {mask(x)}" for x in d.get("uncertain", [])])
 
+    rel = []
+    for r in d.get("related_notes", [])[:5]:
+        rp = safe_note_path(r["path"])
+        if rp and rp != f"AI秘書/{FOLDERS['minutes']}/{minutes_filename(d)[:-3]}":
+            rel.append(f"- [[{rp}|{rp.split('/')[-1].split('__')[0]}]] — 共通: {mask(r['reason'])}")
+    if rel:
+        b.append("## 関連する議事録（同じ会社・案件が登場）")
+        b.extend(rel)
+        b.append("")
     b.append("## 原本")
     b.append(f"- 出典ID: `{src['type']}:{src['id']}`")
     if src.get("transcript_note"):
